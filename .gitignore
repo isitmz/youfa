@@ -1,0 +1,40 @@
+# Bytecode Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# SQLite
+db.sqlite3
+
+# Virtual environment
+env/
+venv/
+Include/
+Lib/
+Scripts/
+Mockup/
+pyvenv.cfg
+
+# VS Code / IDE
+.vscode/
+.idea/
+
+# File temporanei di editor
+*.swp
+*.swo
+*.swn
+*.bak
+*.tmp
+
+# File di log o temporanei
+*.log
+*.pot
+*.mo
+
+# File media/static in dev (opzionale)
+media/
+staticfiles/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
