@@ -1,3 +1,5 @@
+from datetime import datetime
+from django.db import IntegrityError
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
@@ -5,6 +7,8 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib import messages
 import logging
+
+from core.models import UserProfile
 
 # Logger per fare log
 logger = logging.getLogger('core')
@@ -28,31 +32,64 @@ def register(request):
         username = request.POST['username']
         password = request.POST['password']
         confirm_password = request.POST['confirm_password']
+        email = request.POST['email']
+        nome = request.POST['nome']
+        cognome = request.POST['cognome']
+        data_nascita = request.POST['data_nascita']
+        codice_fiscale = request.POST['codice_fiscale']
+        telefono = request.POST['telefono']
 
-        # Controllo che la password e la conferma corrispondano
+        context = {
+            'username': username,
+            'email': email,
+            'nome': nome,
+            'cognome': cognome,
+            'data_nascita': data_nascita,
+            'codice_fiscale': codice_fiscale,
+            'telefono': telefono
+        }
+
         if password != confirm_password:
-            logger.warning(f"Le password non corrispondono per l'utente '{username}'.")
-            messages.error(request, 'Le password non corrispondono.')  # Messaggio di errore
-            return render(request, 'core/register.html')
+            messages.error(request, 'Le password non corrispondono.')
+            return render(request, 'core/register.html', context)
 
-        # Crea un nuovo utente
         try:
-            user = User.objects.create_user(username=username, password=password)
-            logger.info(f"Utente '{username}' creato con successo.")
-            
-            # Dopo la creazione dell'utente, lo loggo automaticamente
+            user = User.objects.create_user(
+                username=username,
+                password=password,
+                email=email,
+                first_name=nome,
+                last_name=cognome
+            )
+
+            UserProfile.objects.create(
+                user=user,
+                nome=nome,
+                cognome=cognome,
+                data_nascita=data_nascita,
+                codice_fiscale=codice_fiscale,
+                telefono=telefono
+            )
+
             login(request, user)
-            logger.info(f"Utente '{username}' loggato automaticamente dopo la registrazione.")
-            
-            # Reindirizza l'utente alla dashboard
-            messages.success(request, "Registrazione avvenuta con successo. Benvenuto nella dashboard!")
-            return redirect('dashboard')  # Redirect alla dashboard
-            
+            return redirect('dashboard')
+
+        except IntegrityError as e:
+            logger.error(f"Errore DB durante la registrazione di '{username}': {e}")
+            # Analisi messaggio errore
+            if 'auth_user.username' in str(e):
+                messages.error(request, 'Questo username è già in uso. Scegline un altro.')
+            elif 'core_userprofile.codice_fiscale' in str(e):
+                messages.error(request, 'Questo codice fiscale è già registrato.')
+            else:
+                messages.error(request, 'Errore durante la registrazione. Controlla i dati inseriti.')
+            return render(request, 'core/register.html', context)
+
         except Exception as e:
-            logger.error(f"Errore durante la creazione dell'utente '{username}': {e}")
-            messages.error(request, 'Errore durante la registrazione. Riprova.')  # Messaggio di errore
-            return render(request, 'core/register.html')
-    
+            logger.exception(f"Errore generico durante la registrazione di '{username}': {e}")
+            messages.error(request, 'Errore imprevisto durante la registrazione. Riprova più tardi.')
+            return render(request, 'core/register.html', context)
+
     return render(request, 'core/register.html')
 
 # Funzione per il login dell'utente
