@@ -14,17 +14,8 @@ from core.models import UserProfile
 logger = logging.getLogger('core')
 
 # Vista per la pagina principale dell'applicazione.
-def index(request):
-    """
-    Renderizza la pagina principale (homepage) dell'applicazione.
-
-    Args:
-        request: L'oggetto HttpRequest.
-
-    Returns:
-        HttpResponse: La pagina HTML 'core/index.html' renderizzata.
-    """
-    return render(request, 'core/index.html')
+#def index(request):
+   # return render(request, 'core/index.html')
 
 # Funzione per la registrazione dell'utente
 def register(request):

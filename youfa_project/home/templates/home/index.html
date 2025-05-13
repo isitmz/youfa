@@ -1,0 +1,45 @@
+<!-- home/templates/home/index.html -->
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>Benvenuto su Youfa Exchange</h1>
+    
+    <div class="row">
+        <!-- Se l'utente è loggato, mostra il saldo -->
+        {% if user_balance %}
+            <div class="col-12 mb-3">
+                <h3>Saldo disponibile: €{{ user_balance }}</h3>
+            </div>
+        {% endif %}
+        
+        <!-- Azioni da comprare -->
+        <div class="col-12 mb-3">
+            <h3>Azioni Disponibili da Comprare</h3>
+            <ul>
+                {% for action in actions %}
+                    <li>{{ action.info['symbol'] }} - {{ action.history(period="1d")['Close'].iloc[-1] }} EUR</li>
+                {% endfor %}
+            </ul>
+        </div>
+        
+        <!-- Ricerca per categoria di azioni -->
+        <div class="col-12 mb-3">
+            <h3>Search by Category</h3>
+            <form>
+                <input type="text" placeholder="Cerca per categoria" class="form-control">
+                <button type="submit" class="btn btn-primary mt-3">Cerca</button>
+            </form>
+        </div>
+        
+        <!-- Grafico del portafoglio (se l'utente è loggato) -->
+        {% if user_balance %}
+            <div class="col-12 mb-3">
+                <h3>Grafico Portafoglio</h3>
+                <!-- Qui puoi inserire un grafico interattivo -->
+                <div style="height: 300px; background-color: #eee;">Grafico del portafoglio</div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
