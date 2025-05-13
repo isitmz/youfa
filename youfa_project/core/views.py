@@ -19,6 +19,9 @@ logger = logging.getLogger('core')
 
 # Funzione per la registrazione dell'utente
 def register(request):
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
@@ -85,6 +88,9 @@ def register(request):
 
 # Funzione per il login dell'utente
 def login_view(request):
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+    
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
