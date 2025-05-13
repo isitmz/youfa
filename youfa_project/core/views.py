@@ -96,9 +96,10 @@ def login_view(request):
             logger.info(f"Utente '{username}' loggato con successo.")
             return redirect('dashboard')  # Redirigi alla dashboard se il login è riuscito
         else:
+            # Se l'utente non esiste o la password è sbagliata, mostra un messaggio di errore
             logger.warning(f"Tentativo di login fallito per l'utente '{username}'.")
-            return render(request, 'core/login.html', {'error': 'Credenziali non valide'})
-    
+            messages.error(request, 'Credenziali non valide. Controlla username e/o password.')
+            return render(request, 'core/login.html')
     return render(request, 'core/login.html')
 
 # Vista per la dashboard, accessibile solo agli utenti loggati.

@@ -1,8 +1,9 @@
 {% extends 'core/base.html' %} {% load static %} {% block content %}
 <div class="container mt-5">
   <div class="row justify-content-center">
-    <div class="col-lg-10 col-xl-8">
-      <div class="card shadow rounded">
+    <!-- Colonna sinistra con il form di registrazione -->
+    <div class="col-lg-6 mb-4">
+      <div class="card shadow-lg rounded border-0">
         <div class="card-body">
           <h3 class="text-center mb-4">Registrazione nuovo utente</h3>
 
@@ -13,7 +14,7 @@
                   alert-danger
                 {% else %}
                   alert-{{ message.tags }}
-                {% endif %} 
+                {% endif %}
                 alert-dismissible fade show"
             role="alert"
           >
@@ -145,6 +146,68 @@
           <p class="text-center mt-3">
             Hai già un account? <a href="{% url 'login' %}">Accedi</a>
           </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Colonna destra con vantaggi -->
+    <div class="col-lg-6 mb-4">
+      <div class="card shadow-lg rounded border-0">
+        <div class="card-body p-4">
+          <h4 class="text-center mb-4">I Vantaggi di Youfa Exchange</h4>
+          <div class="d-flex flex-column">
+            <!-- Icona e vantaggio 1 -->
+            <div class="d-flex mb-3">
+              <i class="bi bi-shield-lock fs-4 text-primary me-3"></i>
+              <div>
+                <h5>Sicurezza Avanzata</h5>
+                <p class="mb-0">
+                  Protezione dei tuoi dati e transazioni, con sistemi
+                  all'avanguardia.
+                </p>
+              </div>
+            </div>
+            <!-- Icona e vantaggio 2 -->
+            <div class="d-flex mb-3">
+              <i class="bi bi-wallet fs-4 text-primary me-3"></i>
+              <div>
+                <h5>Investimenti Facili</h5>
+                <p class="mb-0">
+                  Acquista azioni ed ETF in pochi click, direttamente dal tuo
+                  smartphone o PC.
+                </p>
+              </div>
+            </div>
+            <!-- Icona e vantaggio 3 -->
+            <div class="d-flex mb-3">
+              <i class="bi bi-telephone-inbound fs-4 text-primary me-3"></i>
+              <div>
+                <h5>Assistenza 24/7</h5>
+                <p class="mb-0">
+                  Un team pronto a rispondere a tutte le tue domande, sempre
+                  disponibile.
+                </p>
+              </div>
+            </div>
+            <!-- Icona e vantaggio 4 -->
+            <div class="d-flex mb-3">
+              <i class="bi bi-check-circle fs-4 text-primary me-3"></i>
+              <div>
+                <h5>Affidabilità Garantita</h5>
+                <p class="mb-0">
+                  Un'esperienza di trading solida, che ti permette di investire
+                  con tranquillità.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="text-center mt-4">
+            <p class="mb-0">
+              Unisciti a Youfa Exchange oggi stesso e inizia a investire nel tuo
+              futuro!
+            </p>
+          </div>
         </div>
       </div>
     </div>

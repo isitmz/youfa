@@ -1,22 +1,62 @@
-{% extends 'core/base.html' %}
+{% extends 'core/base.html' %} {% block content %}
+<div class="row justify-content-center mt-5">
+  <div class="col-md-4">
+    <div class="card shadow-sm border-light">
+      <div class="card-body">
+        <h2 class="text-center mb-4">Accedi al tuo account</h2>
 
-{% block content %}
-    <div class="row justify-content-center mt-5">
-        <div class="col-6">
-            <h2>Login</h2>
-            <form method="POST">
-                {% csrf_token %}
-                <div class="form-group">
-                    <label for="username">Username</label>
-                    <input type="text" class="form-control" id="username" name="username" required>
-                </div>
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" class="form-control" id="password" name="password" required>
-                </div>
-                <button type="submit" class="btn btn-primary">Accedi</button>
-            </form>
-            <p>Non hai un account? <a href="{% url 'register' %}">Registrati</a></p>
+        {% if messages %} {% for message in messages %}
+        <div
+          class="alert 
+                                  {% if message.tags == 'error' %}
+                                    alert-danger
+                                  {% else %}
+                                    alert-{{ message.tags }}
+                                  {% endif %}
+                                  alert-dismissible fade show"
+          role="alert"
+        >
+          {{ message }}
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="alert"
+            aria-label="Chiudi"
+          ></button>
         </div>
+        {% endfor %} {% endif %}
+
+        <form method="POST">
+          {% csrf_token %}
+          <div class="form-group mb-3">
+            <label for="username">Username</label>
+            <input
+              type="text"
+              class="form-control"
+              id="username"
+              name="username"
+              required
+              placeholder="Inserisci il tuo username"
+            />
+          </div>
+          <div class="form-group mb-3">
+            <label for="password">Password</label>
+            <input
+              type="password"
+              class="form-control"
+              id="password"
+              name="password"
+              required
+              placeholder="Inserisci la tua password"
+            />
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Accedi</button>
+        </form>
+        <p class="text-center mt-3">
+          Non hai un account? <a href="{% url 'register' %}">Registrati</a>
+        </p>
+      </div>
     </div>
+  </div>
+</div>
 {% endblock %}
