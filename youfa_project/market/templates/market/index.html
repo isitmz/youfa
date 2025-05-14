@@ -1,0 +1,45 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4 text-center">Panoramica del Mercato</h2>
+
+    <div class="row">
+        <!-- Titolo fittizio 1 -->
+        <div class="col-md-4">
+            <div class="card shadow-sm border-light mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">AAPL - Apple Inc.</h5>
+                    <p class="card-text">Prezzo: 183,25 €</p>
+                    <p class="card-text text-success">+1.24%</p>
+                    <a href="#" class="btn btn-outline-primary btn-sm w-100">Dettagli</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Titolo fittizio 2 -->
+        <div class="col-md-4">
+            <div class="card shadow-sm border-light mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">MSFT - Microsoft Corp.</h5>
+                    <p class="card-text">Prezzo: 319,80 €</p>
+                    <p class="card-text text-danger">-0.72%</p>
+                    <a href="#" class="btn btn-outline-primary btn-sm w-100">Dettagli</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Titolo fittizio 3 -->
+        <div class="col-md-4">
+            <div class="card shadow-sm border-light mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">VUAA - Vanguard S&P 500 ETF</h5>
+                    <p class="card-text">Prezzo: 78,15 €</p>
+                    <p class="card-text text-success">+0.95%</p>
+                    <a href="#" class="btn btn-outline-primary btn-sm w-100">Dettagli</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

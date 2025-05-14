@@ -1,5 +1,5 @@
 from datetime import datetime
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
@@ -47,30 +47,33 @@ def register(request):
             messages.error(request, 'Le password non corrispondono.')
             return render(request, 'core/register.html', context)
 
-        try:
-            user = User.objects.create_user(
-                username=username,
-                password=password,
-                email=email,
-                first_name=nome,
-                last_name=cognome
-            )
+        try: # Inizio del blocco try-except
+            with transaction.atomic(): # Inizio della transazione atomica (if fail, allora non salvare nulla)
+                user = User.objects.create_user(
+                    username=username,
+                    password=password,
+                    email=email,
+                    first_name=nome, # Corretto per salvare nome e cognome nell'oggetto User
+                    last_name=cognome
+                )
 
-            UserProfile.objects.create(
-                user=user,
-                nome=nome,
-                cognome=cognome,
-                data_nascita=data_nascita,
-                codice_fiscale=codice_fiscale,
-                telefono=telefono
-            )
+                UserProfile.objects.create(
+                    user=user,
+                    nome=nome,
+                    cognome=cognome,
+                    data_nascita=data_nascita,
+                    codice_fiscale=codice_fiscale,
+                    telefono=telefono
+                )
 
-            login(request, user)
-            return redirect('dashboard')
+                logger.info(f"Utente '{username}' registrato con successo.")
+
+                login(request, user)
+                return redirect('dashboard')
 
         except IntegrityError as e:
-            logger.error(f"Errore DB durante la registrazione di '{username}': {e}")
-            # Analisi messaggio errore
+            logger.error(f"Errore di integrità DB durante la registrazione di '{username}': {e}")
+            # Se la transazione fallisce, nessun utente o profilo utente viene creato.
             if 'auth_user.username' in str(e):
                 messages.error(request, 'Questo username è già in uso. Scegline un altro.')
             elif 'core_userprofile.codice_fiscale' in str(e):
@@ -111,23 +114,16 @@ def login_view(request):
 # Vista per la dashboard, accessibile solo agli utenti loggati.
 @login_required(login_url='login') # Decoratore che richiede l'autenticazione per accedere a questa vista.
 def dashboard(request):
-    """
-    Renderizza la pagina della dashboard dell'utente.
-    Questa vista è protetta e richiede che l'utente sia loggato.
-
-    Args:
-        request: L'oggetto HttpRequest.
-
-    Returns:
-        HttpResponse: La pagina HTML 'core/dashboard.html' renderizzata.
-    """
     return render(request, 'core/dashboard.html')
 
-@login_required
+# Rimosso @login_required. La vista di logout non dovrebbe richiederlo.
+# Permette il logout anche se si accede via GET e gestisce utenti non autenticati
+# reindirizzandoli semplicemente.
 def logout_view(request):
-    if request.method == 'POST':
+    # Esegue il logout se l'utente è autenticato, indipendentemente dal metodo (GET o POST).
+    if request.user.is_authenticated:
         username = request.user.username  # Ottieni il nome utente dell'utente autenticato
         logout(request)
-        logger.info(f"User {username} logged out.") 
-        return redirect('index')  # Reindirizza alla home page
-    return redirect('index')  # O reindirizza a una pagina di errore
+        logger.info(f"User {username} logged out.")
+        #messages.info(request, "Logout effettuato con successo.")
+    return redirect('index')  # Reindirizza sempre alla home page

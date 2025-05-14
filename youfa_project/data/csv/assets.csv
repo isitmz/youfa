@@ -1,0 +1,21 @@
+ticker,nome,exchange,currency,settore,industria,tipo_asset,descrizione
+AAPL,Apple Inc.,NASDAQ,USD,Tecnologia,Elettronica,stock,Apple Inc. progetta e produce elettronica di consumo come iPhone e MacBook.
+GOOGL,Alphabet Inc.,NASDAQ,USD,Tecnologia,Internet,stock,Alphabet Inc. è la società madre di Google e altre aziende.
+MSFT,Microsoft Corporation,NYSE,USD,Tecnologia,Software,stock,Microsoft sviluppa, licenza e supporta prodotti software come Windows e Office.
+AMZN,Amazon.com Inc.,NASDAQ,USD,Consumo Discrezionale,Commercio Online,stock,Amazon è una piattaforma di e-commerce che offre una vasta gamma di prodotti e servizi.
+TSLA,Tesla Inc.,NASDAQ,USD,Consumo Discrezionale,Veicoli Elettrici,stock,Tesla produce auto elettriche e soluzioni di energia rinnovabile.
+SPY,SPDR S&P 500 ETF,NYSE,USD,Finanza,,ETF,ETF che replica l'indice S&P 500.
+IVV,iShares Core S&P 500 ETF,NYSE,USD,Finanza,,ETF,ETF che fornisce esposizione all'indice S&P 500.
+VTI,Vanguard Total Stock Market ETF,NYSE,USD,Finanza,,ETF,ETF che replica l'andamento dell'intero mercato azionario statunitense.
+QQQ,Invesco QQQ Trust,NASDAQ,USD,Finanza,,ETF,ETF che replica l'indice Nasdaq-100.
+DIA,SPDR Dow Jones Industrial Average ETF,NYSE,USD,Finanza,,ETF,ETF che replica l'indice Dow Jones Industrial Average.
+VZ,Verizon Communications,NYSE,USD,Telecomunicazioni,Servizi Telefonici,stock,Verizon fornisce servizi di comunicazione wireless e broadband.
+NFLX,Netflix Inc.,NASDAQ,USD,Servizi di Comunicazione,Media,stock,Netflix è una piattaforma di streaming on-demand per film e serie TV.
+DIS,The Walt Disney Company,NYSE,USD,Servizi di Comunicazione,Media,stock,Disney è un'azienda di intrattenimento globale che produce film, serie TV e contenuti per parchi tematici.
+BA,Boeing Company,NYSE,USD,Industria,Aerospaziale,stock,Boeing progetta e produce aeromobili e prodotti aerospaziali.
+KO,Coca-Cola Company,NYSE,USD,Consumabili,Beveraggi,stock,Coca-Cola è un produttore di bevande analcoliche.
+PG,Procter & Gamble Co.,NYSE,USD,Consumabili,Prodotti per la Casa,stock,Procter & Gamble produce una vasta gamma di prodotti per la cura della casa e della persona.
+UNH,UnitedHealth Group,NYSE,USD,Sanità,Assicurazioni,stock,UnitedHealth fornisce servizi e assicurazioni sanitarie.
+NVDA,NVIDIA Corporation,NASDAQ,USD,Tecnologia,Semi-conduttori,stock,NVIDIA progetta unità di elaborazione grafica (GPU) per giochi e intelligenza artificiale.
+JPM,JPMorgan Chase & Co.,NYSE,USD,Finanza,Banca,stock,JPMorgan Chase è una banca d'investimento multinazionale e una società di servizi finanziari.
+XOM,ExxonMobil Corporation,NYSE,USD,Energia,Petrolio & Gas,stock,ExxonMobil è una delle più grandi compagnie petrolifere e del gas del mondo.

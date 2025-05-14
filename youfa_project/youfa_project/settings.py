@@ -38,8 +38,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'core',
-    'home'
+    'core', #login + registrazione utente + template base home page
+    'home', #index del sito
+    'market' #yfinance
 ]
 
 MIDDLEWARE = [
