@@ -1,45 +1,67 @@
 {% extends 'core/base.html' %}
+{% load static %}
 
 {% block content %}
 <div class="container mt-5">
-    <h2 class="mb-4 text-center">Panoramica del Mercato</h2>
+    <h2 class="mb-4 text-center">Panoramica delle azioni disponibili</h2>
 
-    <div class="row">
-        <!-- Titolo fittizio 1 -->
+    <div class="row" id="asset-list">
+        {% for asset in assets %}
         <div class="col-md-4">
             <div class="card shadow-sm border-light mb-4">
                 <div class="card-body">
-                    <h5 class="card-title">AAPL - Apple Inc.</h5>
-                    <p class="card-text">Prezzo: 183,25 €</p>
-                    <p class="card-text text-success">+1.24%</p>
-                    <a href="#" class="btn btn-outline-primary btn-sm w-100">Dettagli</a>
+                    <h5 class="card-title">{{ asset.ticker }} - {{ asset.nome }}</h5>
+                    <p class="card-text"><strong>Settore:</strong> {{ asset.settore }}</p>
+                    <p class="card-text text-muted price" data-ticker="{{ asset.ticker }}">Prezzo: - $</p>
+                    <button class="btn btn-outline-primary btn-sm w-100 details-btn" data-ticker="{{ asset.ticker }}">Dettagli</button>
                 </div>
             </div>
         </div>
-
-        <!-- Titolo fittizio 2 -->
-        <div class="col-md-4">
-            <div class="card shadow-sm border-light mb-4">
-                <div class="card-body">
-                    <h5 class="card-title">MSFT - Microsoft Corp.</h5>
-                    <p class="card-text">Prezzo: 319,80 €</p>
-                    <p class="card-text text-danger">-0.72%</p>
-                    <a href="#" class="btn btn-outline-primary btn-sm w-100">Dettagli</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Titolo fittizio 3 -->
-        <div class="col-md-4">
-            <div class="card shadow-sm border-light mb-4">
-                <div class="card-body">
-                    <h5 class="card-title">VUAA - Vanguard S&P 500 ETF</h5>
-                    <p class="card-text">Prezzo: 78,15 €</p>
-                    <p class="card-text text-success">+0.95%</p>
-                    <a href="#" class="btn btn-outline-primary btn-sm w-100">Dettagli</a>
-                </div>
-            </div>
-        </div>
+        {% empty %}
+        <p class="text-center">Nessun asset disponibile.</p>
+        {% endfor %}
     </div>
 </div>
+
+<!-- Modal per dettagli e grafico -->
+<div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="detailsModalLabel">Dettagli azione</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Nome e prezzo grandi -->
+        <div class="mb-4">
+          <h4 id="modal-name" class="fw-bold fs-3"></h4>
+          <p id="modal-price" class="fs-5 text-success"></p>
+        </div>
+
+        <!-- Grafico -->
+        <div class="mb-4" style="min-height: 220px;">
+          <canvas id="priceChart" height="200"></canvas>
+        </div>
+
+        <!-- Info aggiuntive in due colonne -->
+        <div id="additional-info" class="row text-muted small">
+          <!-- Inserite via JS -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script
+  src="https://code.jquery.com/jquery-3.7.1.min.js"
+  integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+  crossorigin="anonymous"
+></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{% static 'market/js/assets.js' %}"></script>
 {% endblock %}
