@@ -8,6 +8,31 @@
         <h3 class="mb-0">Benvenuto, {{ user.username }}!</h3>
       </div>
       <div class="card-body">
+        <!-- Blocco per mostrare i messaggi flash di Django -->
+        {% if messages %} {% for message in messages %}
+        <div
+          class="alert 
+              {% if message.tags == 'error' %}
+                alert-danger
+              {% elif message.tags == 'success' %}
+                alert-success
+              {% else %}
+                alert-{{ message.tags }}
+              {% endif %}
+              alert-dismissible fade show mb-3"
+          role="alert"
+        >
+          {{ message }}
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="alert"
+            aria-label="Chiudi"
+          ></button>
+        </div>
+        {% endfor %} {% endif %}
+        <!-- Fine blocco messaggi flash -->
+
         <p class="lead text-muted">Questa è la tua dashboard utente.</p>
 
         <div class="d-flex flex-column gap-3 mt-4">

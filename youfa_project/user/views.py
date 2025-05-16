@@ -6,7 +6,7 @@ from django.shortcuts import render, redirect
 import logging
 from .forms import UserProfileForm
 
-# Ottieni un'istanza del logger
+# un'istanza del logger
 logger = logging.getLogger("user")
 
 @login_required
@@ -38,7 +38,7 @@ def edit_profile(request):
             logger.info(f"Form di aggiornamento profilo valido per l'utente {request.user.username}.")
             profile = form.save(commit=False)
 
-            # Sovrascrivi i campi NON modificabili con i valori originali (ignorare ciò che arriva da POST)
+            # Sovrascrivo i campi NON modificabili con i valori originali (ignorare ciò che arriva da POST)
             profile.nome = original_nome
             profile.cognome = original_cognome
             profile.data_nascita = original_data_nascita
@@ -63,12 +63,32 @@ def change_password(request):
         form = PasswordChangeForm(request.user, request.POST)
         if form.is_valid():
             user = form.save()
-            # Mantieni l'utente loggato dopo il cambio password
+            # tengo la sessione dell'utente senza riloggarlo
             update_session_auth_hash(request, user)
             logger.info(f"Password per l'utente {request.user.username} cambiata con successo.")
+            messages.success(request, "Password cambiata con successo.")
             return redirect('user:dashboard')
         else:
             logger.warning(f"Form di cambio password NON valido per l'utente {request.user.username}. Errori: {form.errors.as_json()}")
+            
+            error_messages_list = []
+            # Itera su tutti gli errori del form
+            for field_name, error_list_for_field in form.errors.items():
+                if field_name == '__all__':
+                    # Errori non legati a un campo specifico (es. validazione incrociata fallita nel clean() del form)
+                    for error in error_list_for_field:
+                        error_messages_list.append(str(error)) # Aggiungi l'errore direttamente
+                else:
+                    # Errori legati a campi specifici
+                    # Prova a ottenere il label del campo per un messaggio più user-friendly
+                    # PasswordChangeForm ha campi come 'old_password', 'new_password1', 'new_password2'
+                    field_label = form.fields[field_name].label if field_name in form.fields and form.fields[field_name].label else field_name.replace('_', ' ').capitalize()
+                    for error in error_list_for_field:
+                        error_messages_list.append(f"{field_label}: {error}")
+            
+            detailed_error_summary = " ".join(error_messages_list)
+            messages.error(request, f"Errore nel cambio password. {detailed_error_summary} Controlla i campi e riprova.")
+
     else:
         logger.info(f"Visualizzazione form di cambio password (GET) per l'utente {request.user.username}.")
         form = PasswordChangeForm(request.user)
