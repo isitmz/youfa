@@ -28,6 +28,10 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+# CONSTANTS
+INITIAL_USER_BALANCE = 10000.00 # sarebbe il bonus di benvenuto, per ora 10k
+LOGIN_URL = '/login/'
+LOGOUT_REDIRECT_URL = '/'
 
 # Application definition
 
@@ -40,7 +44,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'core', #login + registrazione utente + template base home page
     'home', #index del sito
-    'market' #yfinance
+    'market', #yfinance
+    'user' #gestione utente
 ]
 
 MIDDLEWARE = [

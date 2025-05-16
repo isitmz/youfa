@@ -1,0 +1,48 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <div class="card border-secondary">
+      <div class="card-header bg-light text-secondary">
+        <h3 class="mb-0">Profilo di {{ request.user.username }}</h3>
+      </div>
+      <div class="card-body">
+        <dl class="row">
+          <dt class="col-sm-4">Nome</dt>
+          <dd class="col-sm-8">{{ profile.nome }}</dd>
+
+          <dt class="col-sm-4">Cognome</dt>
+          <dd class="col-sm-8">{{ profile.cognome }}</dd>
+
+          <dt class="col-sm-4">Data di nascita</dt>
+          <dd class="col-sm-8">{{ profile.data_nascita|date:"d/m/Y" }}</dd>
+
+          <dt class="col-sm-4">Codice Fiscale</dt>
+          <dd class="col-sm-8">{{ profile.codice_fiscale }}</dd>
+
+          <dt class="col-sm-4">Telefono</dt>
+          <dd class="col-sm-8">{{ profile.telefono }}</dd>
+
+          <dt class="col-sm-4">Saldo</dt>
+          <dd class="col-sm-8">€ {{ profile.saldo }}</dd>
+
+          <dt class="col-sm-4">Notifiche attive</dt>
+          <dd class="col-sm-8">
+            {% if profile.notifiche_attive %}
+              <span class="badge bg-success">Attive</span>
+            {% else %}
+              <span class="badge bg-secondary">Disattivate</span>
+            {% endif %}
+          </dd>
+        </dl>
+
+        <div class="d-flex justify-content-between mt-4">
+          <a href="{% url 'user:edit_profile' %}" class="btn btn-outline-primary">Modifica profilo</a>
+          <a href="{% url 'user:dashboard' %}" class="btn btn-secondary">Torna alla Dashboard</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

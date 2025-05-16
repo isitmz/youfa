@@ -6,9 +6,10 @@ from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib import messages
+from django.conf import settings
 import logging
 
-from core.models import UserProfile
+from user.models import UserProfile
 
 # Logger per fare log
 logger = logging.getLogger('core')
@@ -20,7 +21,7 @@ logger = logging.getLogger('core')
 # Funzione per la registrazione dell'utente
 def register(request):
     if request.user.is_authenticated:
-        return redirect('dashboard')
+        return redirect('user:dashboard')
 
     if request.method == 'POST':
         username = request.POST['username']
@@ -63,13 +64,15 @@ def register(request):
                     cognome=cognome,
                     data_nascita=data_nascita,
                     codice_fiscale=codice_fiscale,
-                    telefono=telefono
+                    telefono=telefono,
+                    saldo=settings.INITIAL_USER_BALANCE,  # saldo iniziale predefinito, presente in settings.py
+                    notifiche_attive=False  # notifiche disattivate di default
                 )
 
                 logger.info(f"Utente '{username}' registrato con successo.")
 
                 login(request, user)
-                return redirect('dashboard')
+                return redirect('user:dashboard')
 
         except IntegrityError as e:
             logger.error(f"Errore di integrità DB durante la registrazione di '{username}': {e}")
@@ -92,7 +95,7 @@ def register(request):
 # Funzione per il login dell'utente
 def login_view(request):
     if request.user.is_authenticated:
-        return redirect('dashboard')
+        return redirect('user:dashboard')
     
     if request.method == 'POST':
         username = request.POST['username']
@@ -103,18 +106,13 @@ def login_view(request):
         if user is not None:
             login(request, user)
             logger.info(f"Utente '{username}' loggato con successo.")
-            return redirect('dashboard')  # Redirigi alla dashboard se il login è riuscito
+            return redirect('user:dashboard')  # Redirigi alla dashboard se il login è riuscito
         else:
             # Se l'utente non esiste o la password è sbagliata, mostra un messaggio di errore
             logger.warning(f"Tentativo di login fallito per l'utente '{username}'.")
             messages.error(request, 'Credenziali non valide. Controlla username e/o password.')
             return render(request, 'core/login.html')
     return render(request, 'core/login.html')
-
-# Vista per la dashboard, accessibile solo agli utenti loggati.
-@login_required(login_url='login') # Decoratore che richiede l'autenticazione per accedere a questa vista.
-def dashboard(request):
-    return render(request, 'core/dashboard.html')
 
 # Rimosso @login_required. La vista di logout non dovrebbe richiederlo.
 # Permette il logout anche se si accede via GET e gestisce utenti non autenticati

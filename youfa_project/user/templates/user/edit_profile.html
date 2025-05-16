@@ -1,0 +1,73 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="row justify-content-center mt-4">
+  <div class="col-md-8">
+    <div class="card border-secondary">
+      <div class="card-header bg-light text-secondary">
+        <h3 class="mb-0">Modifica profilo</h3>
+      </div>
+      <div class="card-body">
+        <form method="post" novalidate id="editProfileForm">
+          {% csrf_token %}
+
+          <div class="mb-3">
+            <label for="{{ form.nome.id_for_label }}" class="form-label">Nome</label>
+            {{ form.nome }} {# Django renderà l'input con class="form-control" e disabled #}
+            <div class="invalid-feedback"> {# Sempre presente per il JS; Bootstrap lo nasconde di default #}
+                {% if form.nome.errors %}{{ form.nome.errors|striptags }}{% endif %}
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="{{ form.cognome.id_for_label }}" class="form-label">Cognome</label>
+            {{ form.cognome }} {# Django renderà l'input con class="form-control" e disabled #}
+            <div class="invalid-feedback">
+                {% if form.cognome.errors %}{{ form.cognome.errors|striptags }}{% endif %}
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="{{ form.data_nascita.id_for_label }}" class="form-label">Data di nascita</label>
+            {{ form.data_nascita }} {# Django renderà l'input con class="form-control", type="date", format e disabled #}
+            <div class="invalid-feedback">
+                {% if form.data_nascita.errors %}{{ form.data_nascita.errors|striptags }}{% endif %}
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="{{ form.telefono.id_for_label }}" class="form-label">Telefono</label>
+            {{ form.telefono }} {# Django renderà l'input con class="form-control", type="tel" e 'required' se applicabile #}
+            <div class="invalid-feedback">
+                {% if form.telefono.errors %}{{ form.telefono.errors|striptags }}{% endif %}
+            </div>
+          </div>
+
+          <div class="form-check mb-3">
+            {{ form.notifiche_attive }} {# Django renderà l'input con class="form-check-input" e 'checked' se appropriato #}
+            <label for="{{ form.notifiche_attive.id_for_label }}" class="form-check-label">{{ form.notifiche_attive.label }}</label>
+            <div class="invalid-feedback"> {# Per i checkbox, il JS potrebbe dover gestire diversamente il posizionamento dell'errore #}
+                {% if form.notifiche_attive.errors %}{{ form.notifiche_attive.errors|striptags }}{% endif %}
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-between">
+            <a href="{% url 'user:profile' %}" class="btn btn-outline-secondary">Annulla</a>
+            <button type="submit" class="btn btn-primary">Salva modifiche</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script
+  src="https://code.jquery.com/jquery-3.7.1.min.js"
+  integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+  crossorigin="anonymous"
+></script>
+<script src="{% static 'user/js/profile_validation.js' %}"></script>
+{% endblock %}
