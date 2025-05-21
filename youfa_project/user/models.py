@@ -4,14 +4,13 @@ from django.contrib.auth.models import User
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
-    # Campi esistenti
+    # Campi aggiuntivi associato a quell'id user
     nome = models.CharField(max_length=30)
     cognome = models.CharField(max_length=30)
     data_nascita = models.DateField()
     codice_fiscale = models.CharField(max_length=16, unique=True)
     telefono = models.CharField(max_length=15)
 
-    # Campi nuovi
     saldo = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     notifiche_attive = models.BooleanField(default=False)
 

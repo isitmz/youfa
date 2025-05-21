@@ -146,6 +146,10 @@
   integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
   crossorigin="anonymous"
 ></script>
+<script>
+  //variabile di stato da usare per il JS
+  const isLoggedIn = {{ user.is_authenticated|yesno:"true,false" }};
+</script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="{% static 'market/js/assets.js' %}"></script>
 <script src="{% static 'market/js/trade.js' %}"></script>

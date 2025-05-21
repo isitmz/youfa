@@ -1,4 +1,4 @@
-$document.ready(function () {
+$(document).ready(function () {
   // Quando il modal viene chiuso (evento Bootstrap)
   $("#detailsModal").on("hidden.bs.modal", function () {
     console.log("🔄 Pulizia modal alla chiusura");
@@ -18,10 +18,11 @@ $document.ready(function () {
 
     // Nascondi grafico e distruggi istanza se presente
     $("#priceChart").hide();
-    if (chartInstance) {
+    /*
+    if (chartInstance || chartInstance != null) {
       chartInstance.destroy();
       chartInstance = null;
-    }
+    }*/
 
     // Reset ticker corrente
     currentTicker = null;
