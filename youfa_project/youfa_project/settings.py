@@ -45,7 +45,8 @@ INSTALLED_APPS = [
     'core', #login + registrazione utente + template base home page
     'home', #index del sito
     'market', #yfinance
-    'user' #gestione utente
+    'user', #gestione utente
+    'portfolio' #gestione portafoglio utente + entry
 ]
 
 MIDDLEWARE = [

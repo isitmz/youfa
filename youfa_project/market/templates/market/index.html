@@ -1,35 +1,70 @@
-{% extends 'core/base.html' %}
-{% load static %}
-
-{% block content %}
+{% extends 'core/base.html' %} {% load static %} {% block content %}
 <div class="container mt-5">
-    <h2 class="mb-4 text-center">Panoramica delle azioni disponibili</h2>
+  <h2 class="mb-4 text-center">Panoramica delle azioni disponibili</h2>
 
-    <div class="row" id="asset-list">
-        {% for asset in assets %}
-        <div class="col-md-4">
-            <div class="card shadow-sm border-light mb-4">
-                <div class="card-body">
-                    <h5 class="card-title">{{ asset.ticker }} - {{ asset.nome }}</h5>
-                    <p class="card-text"><strong>Settore:</strong> {{ asset.settore }}</p>
-                    <p class="card-text text-muted price" data-ticker="{{ asset.ticker }}">Prezzo: - $</p>
-                    <button class="btn btn-outline-primary btn-sm w-100 details-btn" data-ticker="{{ asset.ticker }}">Dettagli</button>
-                </div>
-            </div>
+  {% if user.is_authenticated %}
+  <div class="container mb-4">
+    <div
+      class="p-3 border rounded"
+      style="background-color: #f8f9fa; color: #495057"
+    >
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <div class="fw-semibold fs-5">Benvenuto, {{ username }}!</div>
+          <small class="text-secondary">Saldo disponibile</small>
         </div>
-        {% empty %}
-        <p class="text-center">Nessun asset disponibile.</p>
-        {% endfor %}
+        <div class="fw-bold fs-4 text-dark">$ {{ saldo }}</div>
+      </div>
     </div>
+  </div>
+  {% endif %}
+
+  <div class="row" id="asset-list">
+    {% for asset in assets %}
+    <div class="col-md-4">
+      <div class="card shadow-sm border-light mb-4">
+        <div class="card-body">
+          <h5 class="card-title">{{ asset.ticker }} - {{ asset.nome }}</h5>
+          <p class="card-text"><strong>Settore:</strong> {{ asset.settore }}</p>
+          <p
+            class="card-text text-muted price"
+            data-ticker="{{ asset.ticker }}"
+          >
+            Prezzo: - $
+          </p>
+          <button
+            class="btn btn-outline-primary btn-sm w-100 details-btn"
+            data-ticker="{{ asset.ticker }}"
+          >
+            Dettagli
+          </button>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <p class="text-center">Nessun asset disponibile.</p>
+    {% endfor %}
+  </div>
 </div>
 
 <!-- Modal per dettagli e grafico -->
-<div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
+<div
+  class="modal fade"
+  id="detailsModal"
+  tabindex="-1"
+  aria-labelledby="detailsModalLabel"
+  aria-hidden="true"
+>
   <div class="modal-dialog modal-lg modal-dialog-scrollable">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="detailsModalLabel">Dettagli azione</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Chiudi"
+        ></button>
       </div>
       <div class="modal-body">
         <!-- Nome e prezzo grandi -->
@@ -37,26 +72,75 @@
           <h4 id="modal-name" class="fw-bold fs-3"></h4>
           <p id="modal-price" class="fs-5 text-success"></p>
         </div>
-
         <!-- Grafico -->
-        <div class="mb-4" style="min-height: 220px;">
+        <div class="mb-4" style="min-height: 220px">
           <canvas id="priceChart" height="200"></canvas>
         </div>
 
-        <!-- Info aggiuntive in due colonne -->
-        <div id="additional-info" class="row text-muted small">
+        <!-- Info aggiuntive -->
+        <div id="additional-info" class="row text-muted small mb-3">
           <!-- Inserite via JS -->
         </div>
+
+        {% if user.is_authenticated %}
+        <!-- Area acquisto/vendita -->
+        <div id="trade-section">
+          <!-- Nuove info utente sul titolo -->
+          <div id="user-asset-info" class="fs-6 text-secondary">
+            <p>Quantità posseduta: <span id="modal-quantity">0</span></p>
+            <p>
+              Prezzo medio d'acquisto: $<span id="modal-average-price"
+                >0.00</span
+              >
+            </p>
+          </div>
+          <!-- Form di acquisto/vendita -->
+          <hr />
+          <h5>Compra/Vendi</h5>
+          <form id="trade-form">
+            <div class="row g-2">
+              <div class="col-md-4">
+                <input
+                  type="number"
+                  min="1"
+                  step="1"
+                  class="form-control"
+                  id="trade-quantity"
+                  placeholder="Quantità"
+                  required
+                />
+              </div>
+              <div class="col-md-8 d-flex gap-2">
+                <button
+                  type="submit"
+                  class="btn btn-success flex-grow-1"
+                  data-action="buy"
+                >
+                  Compra
+                </button>
+                <button
+                  type="submit"
+                  class="btn btn-danger flex-grow-1"
+                  data-action="sell"
+                >
+                  Vendi
+                </button>
+              </div>
+            </div>
+            <div class="mt-2" id="trade-message" class="small"></div>
+          </form>
+        </div>
+        {% endif %}
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Chiudi
+        </button>
       </div>
     </div>
   </div>
 </div>
-{% endblock %}
-
-{% block extra_js %}
+{% endblock %} {% block extra_js %}
 <script
   src="https://code.jquery.com/jquery-3.7.1.min.js"
   integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
@@ -64,4 +148,7 @@
 ></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="{% static 'market/js/assets.js' %}"></script>
+<script src="{% static 'market/js/trade.js' %}"></script>
+<script src="{% static 'market/js/hide_modal.js' %}"></script>
+
 {% endblock %}

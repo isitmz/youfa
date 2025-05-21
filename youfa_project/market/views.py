@@ -2,7 +2,14 @@ import logging
 from django.http import JsonResponse
 from django.shortcuts import render
 from market.models import Asset
+from user.models import UserProfile
 from django.views.decorators.http import require_GET
+from decimal import Decimal, InvalidOperation
+import json
+from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
+from portfolio.models import PortfolioItem
 from .utils import get_ticker_info, get_ticker_history
 
 logger = logging.getLogger("market_logger")
@@ -10,7 +17,19 @@ logger = logging.getLogger("market_logger")
 def market_home(request):
     logger.info("Accesso alla pagina principale del mercato.")
     assets = Asset.objects.all().order_by('ticker')
-    return render(request, 'market/index.html', {'assets': assets})
+
+    context = {'assets': assets}
+
+    if request.user.is_authenticated:
+        try:
+            profile = UserProfile.objects.get(user=request.user)
+            context['username'] = request.user.username
+            context['saldo'] = profile.saldo
+        except UserProfile.DoesNotExist:
+            context['username'] = request.user.username
+            context['saldo'] = None
+
+    return render(request, 'market/index.html', context)
 
 @require_GET
 def get_price_details(request, ticker):
@@ -99,3 +118,83 @@ def get_chart_data(request, ticker):
         })
     logger.info(f"Dati grafico recuperati con successo per il ticker: {ticker}")
     return JsonResponse({"ticker": ticker.upper(), "period": period, "interval": interval, "data": data})
+
+@login_required
+@require_POST
+def trade_asset(request):
+    try:
+        data = json.loads(request.body)
+        ticker = data.get("ticker")
+        quantity = Decimal(str(data.get("quantity")))
+        price = Decimal(str(data.get("price")))
+        operation = data.get("operation")
+        logger.info(f"Richiesta {operation} ricevuta per {ticker}: quantità={quantity}, prezzo={price}")
+    except (json.JSONDecodeError, TypeError, InvalidOperation) as e:
+        logger.error(f"Errore nel parsing dei dati: {e}")
+        return JsonResponse({"error": "Dati non validi."}, status=400)
+
+    if not ticker or quantity <= 0 or price <= 0 or operation not in ("buy", "sell"):
+        logger.warning(f"Parametri invalidi: ticker={ticker}, quantità={quantity}, prezzo={price}, operazione={operation}")
+        return JsonResponse({"error": "Parametri invalidi."}, status=400)
+
+    try:
+        asset = Asset.objects.get(ticker=ticker)
+    except Asset.DoesNotExist:
+        logger.error(f"Asset non trovato: {ticker}")
+        return JsonResponse({"error": "Asset non trovato."}, status=404)
+
+    user_profile = UserProfile.objects.get(user=request.user)
+    portfolio_item, created = PortfolioItem.objects.get_or_create(
+        user=request.user,
+        asset=asset,
+        defaults={"quantity": 0, "avg_price": 0}
+    )
+
+    if operation == "buy":
+        total_cost = quantity * price
+        if user_profile.saldo < total_cost:
+            logger.warning(f"Saldo insufficiente per l'acquisto: saldo={user_profile.saldo}, costo={total_cost}")
+            return JsonResponse({"error": "Saldo insufficiente."}, status=400)
+
+        new_total_qty = portfolio_item.quantity + quantity
+        new_avg_price = (
+            (portfolio_item.quantity * portfolio_item.avg_price) + (quantity * price)
+        ) / new_total_qty if new_total_qty > 0 else 0
+
+        portfolio_item.quantity = new_total_qty
+        portfolio_item.avg_price = new_avg_price
+        portfolio_item.save()
+
+        user_profile.saldo -= total_cost
+        user_profile.save()
+
+        logger.info(f"Acquisto completato: utente={request.user.username}, ticker={ticker}, quantità={quantity}, prezzo medio={new_avg_price}, saldo rimanente={user_profile.saldo}")
+
+        return JsonResponse({
+            "message": "Acquisto effettuato con successo.",
+            "saldo": float(user_profile.saldo),
+            "quantity": float(portfolio_item.quantity),
+            "avg_price": float(portfolio_item.avg_price),
+        })
+
+    else:  # sell
+        if portfolio_item.quantity < quantity:
+            logger.warning(f"Quantità da vendere superiore a quella posseduta: posseduta={portfolio_item.quantity}, richiesta={quantity}")
+            return JsonResponse({"error": "Quantità da vendere superiore a quella posseduta."}, status=400)
+
+        portfolio_item.quantity -= quantity
+        if portfolio_item.quantity == 0:
+            portfolio_item.avg_price = 0
+        portfolio_item.save()
+
+        user_profile.saldo += quantity * price
+        user_profile.save()
+
+        logger.info(f"Vendita completata: utente={request.user.username}, ticker={ticker}, quantità={quantity}, saldo aggiornato={user_profile.saldo}")
+
+        return JsonResponse({
+            "message": "Vendita effettuata con successo.",
+            "saldo": float(user_profile.saldo),
+            "quantity": float(portfolio_item.quantity),
+            "avg_price": float(portfolio_item.avg_price),
+        })
