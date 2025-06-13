@@ -8,7 +8,8 @@ from decimal import Decimal, InvalidOperation
 import json
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
-from portfolio.models import PortfolioItem
+from portfolio.models import PortfolioItem, PortfolioTransaction
+from django.db import transaction
 from .utils import get_ticker_info, get_ticker_history
 
 logger = logging.getLogger("market_logger")
@@ -125,9 +126,8 @@ def get_chart_data(request, ticker):
 
 @login_required
 @require_POST
+@transaction.atomic
 def trade_asset(request):
-    # API per gestire le operazioni di acquisto e vendita di asset da parte dell'utente.
-    # Richiede autenticazione e che la richiesta sia di tipo POST.
     try:
         data = json.loads(request.body)
         ticker = data.get("ticker")
@@ -174,6 +174,15 @@ def trade_asset(request):
         user_profile.saldo -= total_cost
         user_profile.save()
 
+        # Storico: salva transazione di acquisto
+        PortfolioTransaction.objects.create(
+            user=request.user,
+            asset=asset,
+            action="BUY",
+            quantity=quantity,
+            price_at_transaction=price,
+        )
+
         logger.info(f"Acquisto completato: utente={request.user.username}, ticker={ticker}, quantità={quantity}, prezzo medio={new_avg_price}, saldo rimanente={user_profile.saldo}")
 
         return JsonResponse({
@@ -190,7 +199,6 @@ def trade_asset(request):
 
         portfolio_item.quantity -= quantity
         if portfolio_item.quantity == 0:
-            # Se la quantità è zero, rimuovi l'item dal portafoglio
             portfolio_item.delete()
             logger.info(f"Item {ticker} rimosso dal portafoglio di {request.user.username} poiché la quantità è zero.")
         else:
@@ -198,6 +206,19 @@ def trade_asset(request):
 
         user_profile.saldo += quantity * price
         user_profile.save()
+
+        # Calcolo percentuale di profitto
+        profit_percent = ((price - portfolio_item.avg_price) / portfolio_item.avg_price) * 100
+
+        # Storico: salva transazione di vendita
+        PortfolioTransaction.objects.create(
+            user=request.user,
+            asset=asset,
+            action="SELL",
+            quantity=quantity,
+            price_at_transaction=price,
+            profit_percentage=profit_percent
+        )
 
         logger.info(f"Vendita completata: utente={request.user.username}, ticker={ticker}, quantità={quantity}, saldo aggiornato={user_profile.saldo}")
 

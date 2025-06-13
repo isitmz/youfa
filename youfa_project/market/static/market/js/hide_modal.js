@@ -1,32 +1,34 @@
 $(document).ready(function () {
-  // Quando il modal viene chiuso (evento Bootstrap)
   $("#detailsModal").on("hidden.bs.modal", function () {
-    console.log("🔄 Pulizia modal alla chiusura");
+    console.log("🔄 Pulizia completa del modal");
 
-    // Svuota testi e messaggi
+    // Reset titoli e prezzo
     $("#modal-name").text("");
     $("#modal-price").text("");
-    $("#modal-quantity").text("—");
-    $("#modal-average-price").text("—");
-    $("#trade-message").text("").removeClass("text-danger text-success");
 
-    // Svuota input quantità trade
+    // Reset informazioni utente
+    $("#modal-balance").text("$ -");
+    $("#modal-quantity").text("0");
+    $("#modal-average-price").text("0.00");
+
+    // Reset campo input quantità
     $("#trade-quantity").val("");
 
-    // Svuota informazioni aggiuntive
+    // Reset messaggi di stato
+    $("#estimated-total").text("Totale stimato: -");
+    $("#trade-message").text("").removeClass("text-success text-danger");
+
+    // Svuota le info aggiuntive
     $("#additional-info").empty();
 
-    $("#estimated-total").text("Totale stimato: -");
-
-    // Nascondi grafico e distruggi istanza se presente
+    // Nasconde e distrugge grafico se esiste
+    if (window.priceChartInstance) {
+      window.priceChartInstance.destroy();
+      window.priceChartInstance = null;
+    }
     $("#priceChart").hide();
-    /*
-    if (chartInstance || chartInstance != null) {
-      chartInstance.destroy();
-      chartInstance = null;
-    }*/
 
-    // Reset ticker corrente
-    currentTicker = null;
+    // Reset variabili globali di stato se presenti
+    window.currentTicker = null;
   });
 });

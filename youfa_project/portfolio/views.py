@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from user.models import UserProfile
-from .models import PortfolioItem
+from .models import PortfolioItem, PortfolioTransaction
 
 logger = logging.getLogger("portfolio_logger")
 
@@ -54,6 +54,7 @@ def user_portfolio(request):
 
     # Asset posseduti
     portfolio_items = PortfolioItem.objects.filter(user=user).select_related('asset')
+    transactions = PortfolioTransaction.objects.filter(user=request.user).order_by('-timestamp')
 
     assets = []
     for item in portfolio_items:
@@ -66,4 +67,5 @@ def user_portfolio(request):
     return render(request, 'portfolio/overview.html', {
         'saldo': saldo,
         'assets': assets,
+        "transactions": transactions,
     })
