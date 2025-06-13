@@ -2,12 +2,20 @@ $(document).ready(function () {
   console.log("📈 Portfolio.js avviato (jQuery)");
 
   let capitaleInvestito = 0;
+  let assetsData = []; // Per grafico a torta: { ticker, quantity }
+
+  // Conta quanti ticker elaborare per sapere quando siamo a fine aggiornamento
+  const totalAssets = $(".current-price").length;
+  let processedAssets = 0;
 
   $(".current-price").each(function () {
     const $priceElem = $(this);
     const ticker = $priceElem.data("ticker");
     const $totalElem = $(`.total-value[data-ticker="${ticker}"]`);
     const quantity = parseFloat($totalElem.data("quantity"));
+
+    // Salvo i dati per il grafico
+    assetsData.push({ ticker, quantity });
 
     $.ajax({
       url: `/market/api/price/${ticker}/`,
@@ -32,7 +40,74 @@ $(document).ready(function () {
         $priceElem.text("Errore");
         $totalElem.text("Errore");
       },
+      complete: function () {
+        processedAssets++;
+        if (processedAssets === totalAssets) {
+          // Tutti i prezzi caricati: ora crea il grafico a torta
+          createPieChart(assetsData);
+        }
+      },
     });
-
   });
+
+  function createPieChart(data) {
+    // Filtra solo asset con quantità > 0
+    const filtered = data.filter((item) => item.quantity > 0);
+    if (filtered.length === 0) {
+      // Se non ci sono asset, mostra messaggio nel canvas
+      const ctx = $("#portfolioPieChart")[0].getContext("2d");
+      ctx.font = "16px Arial";
+      ctx.fillText("Nessun asset da mostrare", 10, 50);
+      return;
+    }
+
+    const labels = filtered.map((item) => item.ticker);
+    const quantities = filtered.map((item) => item.quantity);
+
+    const colors = [
+      "#4e73df",
+      "#1cc88a",
+      "#36b9cc",
+      "#f6c23e",
+      "#e74a3b",
+      "#858796",
+      "#5a5c69",
+      "#fd7e14",
+      "#20c997",
+      "#6610f2",
+    ];
+
+    new Chart($("#portfolioPieChart"), {
+      type: "pie",
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            data: quantities,
+            backgroundColor: colors.slice(0, labels.length),
+            borderColor: "#fff",
+            borderWidth: 2,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: "bottom",
+            labels: { boxWidth: 20, padding: 15 },
+          },
+          tooltip: {
+            callbacks: {
+              label: (context) => {
+                const label = context.label || "";
+                const value = context.parsed || 0;
+                return `${label}: ${value.toLocaleString()}`;
+              },
+            },
+          },
+        },
+      },
+    });
+  }
 });

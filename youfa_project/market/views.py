@@ -190,8 +190,11 @@ def trade_asset(request):
 
         portfolio_item.quantity -= quantity
         if portfolio_item.quantity == 0:
-            portfolio_item.avg_price = 0
-        portfolio_item.save()
+            # Se la quantità è zero, rimuovi l'item dal portafoglio
+            portfolio_item.delete()
+            logger.info(f"Item {ticker} rimosso dal portafoglio di {request.user.username} poiché la quantità è zero.")
+        else:
+            portfolio_item.save()
 
         user_profile.saldo += quantity * price
         user_profile.save()
