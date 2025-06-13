@@ -13,7 +13,9 @@
           <div class="fw-semibold fs-5">Benvenuto, {{ username }}!</div>
           <small class="text-secondary">Saldo disponibile</small>
         </div>
-        <div id="user-balance" class="fw-bold fs-4 text-dark">$ {{ saldo }}</div>
+        <div id="user-balance" class="fw-bold fs-4 text-dark">
+          $ {{ saldo }}
+        </div>
       </div>
     </div>
   </div>
@@ -86,18 +88,18 @@
         <!-- Area acquisto/vendita -->
         <div id="trade-section">
           <!-- Nuove info utente sul titolo -->
-          <div id="user-asset-info" class="fs-6 text-secondary">
-            <p>Quantità posseduta: <span id="modal-quantity">0</span></p>
-            <p>
-              Prezzo medio d'acquisto: $<span id="modal-average-price"
-                >0.00</span
-              >
-            </p>
+          <div class="mb-3 p-3 border rounded bg-light">
+            <div class="d-flex justify-content-between align-items-center">
+              <div class="fw-semibold fs-5 text-dark">Saldo disponibile</div>
+              <div id="modal-balance" class="fw-bold fs-5 text-primary">
+                $ -
+              </div>
+            </div>
           </div>
           <!-- Form di acquisto/vendita -->
           <hr />
           <h5>Compra/Vendi</h5>
-          
+
           <form id="trade-form">
             <div class="row g-2">
               <div class="col-md-4">
@@ -129,12 +131,12 @@
               </div>
             </div>
             <div
-            class="mt-2 text-muted"
-            id="estimated-total"
-            style="font-size: 0.95rem"
-          >
-            Totale stimato: -
-          </div>
+              class="mt-2 text-muted"
+              id="estimated-total"
+              style="font-size: 0.95rem"
+            >
+              Totale stimato: -
+            </div>
             <div class="mt-2" id="trade-message" class="small"></div>
           </form>
         </div>

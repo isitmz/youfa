@@ -23,6 +23,18 @@ $(document).ready(function () {
           $("#modal-average-price").text("0.00");
         },
       });
+
+      // Recupero saldo
+      $.ajax({
+        url: "/portfolio/api/portfolio-balance/",
+        method: "GET",
+        success: function (data) {
+          $("#modal-balance").text(`$ ${data.saldo.toFixed(2)}`);
+        },
+        error: function () {
+          $("#modal-balance").text("$ -");
+        },
+      });
     }
   });
 
@@ -85,9 +97,9 @@ $(document).ready(function () {
           .addClass("text-success");
 
         // Aggiorna saldo
-        $("#user-balance").text(
-          `$ ${response.saldo.toFixed(2)}`
-        );
+        $("#user-balance").text(`$ ${response.saldo.toFixed(2)}`);
+
+        $("#modal-balance").text(`$ ${response.saldo.toFixed(2)}`);
 
         // Aggiorna quantità e prezzo medio
         $("#modal-quantity").text(response.quantity.toFixed(2));
