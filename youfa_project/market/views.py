@@ -7,7 +7,6 @@ from django.views.decorators.http import require_GET
 from decimal import Decimal, InvalidOperation
 import json
 from django.views.decorators.http import require_POST
-from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from portfolio.models import PortfolioItem
 from .utils import get_ticker_info, get_ticker_history
@@ -15,6 +14,8 @@ from .utils import get_ticker_info, get_ticker_history
 logger = logging.getLogger("market_logger")
 
 def market_home(request):
+    # Visualizza la pagina principale del mercato con l'elenco degli asset.
+    # Se l'utente è autenticato, mostra anche il saldo.
     logger.info("Accesso alla pagina principale del mercato.")
     assets = Asset.objects.all().order_by('ticker')
 
@@ -33,6 +34,7 @@ def market_home(request):
 
 @require_GET
 def get_price_details(request, ticker):
+    # API per ottenere i dettagli del prezzo di un asset.
     logger.info(f"Richiesta dettagli prezzo per il ticker: {ticker}")
     info = get_ticker_info(ticker)
 
@@ -49,6 +51,7 @@ def get_price_details(request, ticker):
 
 @require_GET
 def get_asset_details(request, ticker):
+    # API per ottenere i dettagli completi di un asset, inclusi dati storici.
     logger.info(f"Richiesta dettagli asset per il ticker: {ticker}")
     info = get_ticker_info(ticker)
     if not info:
@@ -88,8 +91,9 @@ def get_asset_details(request, ticker):
 
 @require_GET
 def get_chart_data(request, ticker):
+    # API per ottenere i dati storici di un asset per la visualizzazione di un grafico.
     period = request.GET.get('period', '6mo')
-    interval = request.GET.get('interval', '1d')
+    interval = request.GET.get('interval', '1d')    
 
     # Limitazioni accettabili period e interval
     allowed_periods = ['1mo', '3mo', '6mo', '1y']
@@ -122,6 +126,8 @@ def get_chart_data(request, ticker):
 @login_required
 @require_POST
 def trade_asset(request):
+    # API per gestire le operazioni di acquisto e vendita di asset da parte dell'utente.
+    # Richiede autenticazione e che la richiesta sia di tipo POST.
     try:
         data = json.loads(request.body)
         ticker = data.get("ticker")

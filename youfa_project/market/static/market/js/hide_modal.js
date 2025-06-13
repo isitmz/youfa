@@ -16,6 +16,8 @@ $(document).ready(function () {
     // Svuota informazioni aggiuntive
     $("#additional-info").empty();
 
+    $("#estimated-total").text("Totale stimato: -");
+
     // Nascondi grafico e distruggi istanza se presente
     $("#priceChart").hide();
     /*

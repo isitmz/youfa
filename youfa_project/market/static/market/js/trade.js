@@ -6,14 +6,16 @@ $(document).ready(function () {
     const ticker = $(this).data("ticker");
     currentTicker = ticker;
 
+    // Check con variabile assegnata da Django in base alla sessione dell'utente
     if (isLoggedIn) {
       console.log(`🟢 Trade.js: richiesta portfolio-info per ${ticker}`);
 
+      // Questa richiesta serve per recuperare i dati di un'azione di un utente (se la possiede)
       $.ajax({
         url: `/portfolio/api/portfolio-info/${ticker}/`,
         method: "GET",
         success: function (data) {
-          $("#modal-quantity").text(data.quantity);
+          $("#modal-quantity").text(data.quantity.toFixed(2));
           $("#modal-average-price").text(data.avg_price.toFixed(2));
         },
         error: function () {
@@ -46,7 +48,7 @@ $(document).ready(function () {
       return;
     }
 
-    // Prendi il prezzo da #modal-price (es. "123.45 USD")
+    // Prendo il prezzo da #modal-price (es. "123.45 USD")
     const priceText = $("#modal-price")
       .text()
       .replace(/[^0-9.,]/g, "");
@@ -66,6 +68,8 @@ $(document).ready(function () {
       price: price,
     };
 
+    // console.log("Request buy per " + data);
+
     $.ajax({
       url: "/market/api/trade/",
       method: "POST",
@@ -81,12 +85,12 @@ $(document).ready(function () {
           .addClass("text-success");
 
         // Aggiorna saldo
-        $(".container.mb-4 .fw-bold.fs-4").text(
+        $("#user-balance").text(
           `$ ${response.saldo.toFixed(2)}`
         );
 
         // Aggiorna quantità e prezzo medio
-        $("#modal-quantity").text(response.quantity);
+        $("#modal-quantity").text(response.quantity.toFixed(2));
         $("#modal-average-price").text(response.avg_price.toFixed(2));
       },
       error: function (xhr) {
@@ -114,4 +118,28 @@ $(document).ready(function () {
     }
     return cookieValue;
   }
+
+  // Aggiorna il totale stimato ogni volta che cambia la quantità
+  $("#trade-quantity").on("change", function () {
+    const quantity = parseInt($(this).val(), 10);
+
+    // Ottieni il prezzo attuale dal DOM
+    const priceText = $("#modal-price").text(); // es. "123.45 USD"
+    const match = priceText.match(/([\d,.]+)/);
+
+    if (!match) {
+      $("#estimated-total").text("Totale stimato: -");
+      return;
+    }
+
+    const price = parseFloat(match[1].replace(",", "."));
+
+    if (isNaN(quantity) || quantity <= 0 || isNaN(price)) {
+      $("#estimated-total").text("Totale stimato: -");
+      return;
+    }
+
+    const total = (quantity * price).toFixed(2);
+    $("#estimated-total").text(`Totale stimato: $ ${total}`);
+  });
 });

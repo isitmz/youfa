@@ -13,7 +13,7 @@
           <div class="fw-semibold fs-5">Benvenuto, {{ username }}!</div>
           <small class="text-secondary">Saldo disponibile</small>
         </div>
-        <div class="fw-bold fs-4 text-dark">$ {{ saldo }}</div>
+        <div id="user-balance" class="fw-bold fs-4 text-dark">$ {{ saldo }}</div>
       </div>
     </div>
   </div>
@@ -97,6 +97,7 @@
           <!-- Form di acquisto/vendita -->
           <hr />
           <h5>Compra/Vendi</h5>
+          
           <form id="trade-form">
             <div class="row g-2">
               <div class="col-md-4">
@@ -127,6 +128,13 @@
                 </button>
               </div>
             </div>
+            <div
+            class="mt-2 text-muted"
+            id="estimated-total"
+            style="font-size: 0.95rem"
+          >
+            Totale stimato: -
+          </div>
             <div class="mt-2" id="trade-message" class="small"></div>
           </form>
         </div>
