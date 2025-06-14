@@ -2,8 +2,15 @@ import logging
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_GET
 from user.models import UserProfile
 from .models import PortfolioItem, PortfolioTransaction
+from market.utils import get_ticker_history # metodo utils
+from datetime import timedelta
+from django.utils import timezone
+
+
+# Imposto il logger
 
 logger = logging.getLogger("portfolio_logger")
 
@@ -44,6 +51,7 @@ def get_saldo(request):
         logger.error(f"Profilo utente non trovato per {request.user.username} durante il recupero del saldo.")
         return JsonResponse({'error': 'Profilo utente non trovato.'}, status=404)
     
+# Vista per mostrare la pagina del portafoglio utente con saldo, asset posseduti e transazioni.
 @login_required
 def user_portfolio(request):
     user = request.user
@@ -65,7 +73,51 @@ def user_portfolio(request):
         })
 
     return render(request, 'portfolio/overview.html', {
+        'username': profile.user.username,
         'saldo': saldo,
         'assets': assets,
         "transactions": transactions,
     })
+
+@login_required
+@require_GET
+def portfolio_history_api(request):
+    user = request.user
+
+    # Recupera la prima transazione dell’utente
+    first_tx = PortfolioTransaction.objects.filter(user=user).order_by("timestamp").first()
+
+    if not first_tx:
+        return JsonResponse({"history": []})  # Nessuna transazione: grafico vuoto
+
+    start_date = first_tx.timestamp.date()
+    today = timezone.now().date()
+    days = (today - start_date).days + 1  # +1 per includere oggi
+
+    history_data = []
+
+    portfolio_items = PortfolioItem.objects.filter(user=user)
+
+    for day_offset in range(days):
+        date = start_date + timedelta(days=day_offset)
+        day_total = 0
+        found_data = False
+
+        for item in portfolio_items:
+            ticker = item.asset.ticker
+            hist = get_ticker_history(ticker, period="1y", interval="1d")
+            if hist is not None:
+                date_str = date.strftime("%Y-%m-%d")
+                if date_str in hist.index:
+                    close_price = hist.loc[date_str]["Close"]
+                    day_total += float(item.quantity) * float(close_price)
+                    found_data = True
+
+        # Aggiungi solo se c'è almeno un dato valido per quel giorno
+        if found_data:
+            history_data.append({
+                "date": date.strftime("%d/%m"),
+                "value": round(day_total, 2),
+            })
+
+    return JsonResponse({"history": history_data})

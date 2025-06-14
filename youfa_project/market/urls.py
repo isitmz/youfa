@@ -1,6 +1,8 @@
 from django.urls import path
 from . import views
 
+app_name = 'market'
+
 #l'app market nelle Urls espone le API per i titoli
 urlpatterns = [
     path('api/details/<str:ticker>/', views.get_asset_details, name='api_get_asset_details'), #path dell'API esposta

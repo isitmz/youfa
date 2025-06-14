@@ -110,4 +110,76 @@ $(document).ready(function () {
       },
     });
   }
+
+  loadPortfolioHistory();
 });
+
+
+function loadPortfolioHistory() {
+  $.get("/portfolio/history/", function (response) {
+    const history = response.history;
+    if (!history || history.length === 0) return;
+
+    const labels = history.map((entry) => entry.date);
+    const values = history.map((entry) => entry.value);
+
+    const start = values[0];
+    const end = values[values.length - 1];
+
+    let lineColor = "#6c757d"; // grigio neutro
+    if (end > start) lineColor = "#198754"; // verde (bootstrap success)
+    else if (end < start) lineColor = "#dc3545"; // rosso (bootstrap danger)
+
+    const ctx = document.getElementById("portfolioHistoryChart").getContext("2d");
+    new Chart(ctx, {
+      type: "line",
+      data: {
+        labels: labels,
+        datasets: [{
+          label: "Valore portafoglio",
+          data: values,
+          borderColor: lineColor,
+          backgroundColor: hexToRgba(lineColor, 0.15),
+          fill: true,
+          tension: 0.3,
+          pointRadius: 3,
+          pointHoverRadius: 5,
+        }],
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => `$ ${ctx.parsed.y.toFixed(2)}`
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: false,
+            ticks: {
+              callback: (value) => `$ ${value.toFixed(0)}`
+            }
+          },
+          x: {
+            ticks: {
+              maxTicksLimit: 8,
+              autoSkip: true,
+            }
+          }
+        }
+      }
+    });
+  });
+}
+
+// Support function: HEX to RGBA
+function hexToRgba(hex, alpha = 1) {
+  const bigint = parseInt(hex.slice(1), 16);
+  const r = (bigint >> 16) & 255;
+  const g = (bigint >> 8) & 255;
+  const b = bigint & 255;
+  return `rgba(${r},${g},${b},${alpha})`;
+}

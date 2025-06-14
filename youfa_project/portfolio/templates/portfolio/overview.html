@@ -3,7 +3,7 @@
 {% block content %}
 
 <div class="container mt-5">
-  <h2 class="mb-4 text-center">Il tuo Portafoglio</h2>
+  <h2 class="mb-4 text-center">Il tuo portafoglio - {{ username }}</h2>
 
   <!-- Saldo e Capitale investito -->
   <div class="mb-4 p-3 border rounded bg-light text-dark">
@@ -25,6 +25,16 @@
     </div>
   </div>
 
+   <!-- Andamento Portafoglio -->
+<div class="mb-5">
+  <div class="card border-0 shadow-sm">
+    <div class="card-body">
+      <h5 class="card-title text-center mb-4">Andamento del portafoglio (da inizio investimento)</h5>
+      <canvas id="portfolioHistoryChart" style="max-height: 300px;"></canvas>
+    </div>
+  </div>
+</div>
+
   <!-- Tabella asset -->
   <div class="table-responsive mb-5">
     <table class="table table-hover table-bordered align-middle text-center">
@@ -32,7 +42,7 @@
         <tr class="align-middle">
           <th>Ticker</th>
           <th>Quantità</th>
-          <th>Prezzo Medio</th>
+          <th>Prezzo Medio di acquisto</th>
           <th>Prezzo Attuale</th>
           <th>Valore Totale</th>
         </tr>

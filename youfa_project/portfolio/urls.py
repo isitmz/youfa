@@ -8,4 +8,5 @@ urlpatterns = [
     path('', views.user_portfolio, name='user_portfolio'),
     path('api/portfolio-info/<str:ticker>/', views.portfolio_info, name='portfolio_info'),
     path('api/portfolio-balance/', views.get_saldo, name='get_saldo'),
+    path("history/", views.portfolio_history_api, name="portfolio-history-api"),
 ]
