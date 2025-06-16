@@ -16,7 +16,7 @@ class PortfolioItem(models.Model):
     def __str__(self):
         return f"{self.user.username} - {self.asset.ticker} ({self.quantity})"
 
-# rappresenta lo storico del portafoglio utente (acquisto/vendita) con azione N
+# rappresenta lo storico con le transazioni dei vari asset
 class PortfolioTransaction(models.Model):
     BUY = 'BUY'
     SELL = 'SELL'

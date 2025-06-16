@@ -2,6 +2,12 @@ import yfinance as yf
 import logging
 logger = logging.getLogger("market_logger")
 
+# Questo file contiene funzioni di utilità per interagire con la libreria yfinance. 
+# Fornisce metodi per recuperare informazioni generali, dati storici sui prezzi
+# dividendi e dati finanziari per specifici ticker azionari, 
+# gestendo eventuali errori durante il processo.
+# Una sorta di wrapper del modulo YFinance
+
 def get_ticker_info(ticker):
     try:
         stock = yf.Ticker(ticker)

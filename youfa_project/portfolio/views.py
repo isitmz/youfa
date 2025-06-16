@@ -19,6 +19,7 @@ logger = logging.getLogger("portfolio_logger")
 def portfolio_info(request, ticker):
     # Recupera le informazioni del portafoglio per un dato ticker per l'utente loggato.
     # Restituisce la quantità posseduta e il prezzo medio di acquisto.
+    # Viene usata nella pagina di modal per caricare le azioni possedute e il prezzo medio di acquisto
     logger.info(f"Richiesta informazioni portafoglio per l'utente {request.user.username} e ticker {ticker}.")
     user = request.user
     try:
@@ -79,43 +80,55 @@ def user_portfolio(request):
         "transactions": transactions,
     })
 
+# Api per recuperare lo storico portafoglio utente
 @login_required
 @require_GET
 def portfolio_history_api(request):
     user = request.user
     logger.info(f"Richiesta API storico portafoglio per l'utente {user.username}.")
 
-    # Recupera la prima transazione dell’utente
+    # Recupera la prima transazione dell'utente, ordinata per data, per determinare la data di inizio dello storico.
     first_tx = PortfolioTransaction.objects.filter(user=user).order_by("timestamp").first()
 
+    # Se non ci sono transazioni, restituisce uno storico vuoto.
     if not first_tx:
         logger.info(f"Nessuna transazione trovata per l'utente {user.username}. Restituzione storico vuoto.")
         return JsonResponse({"history": []})  # Nessuna transazione: grafico vuoto
 
+    # Imposta la data di inizio dello storico alla data della prima transazione.
     start_date = first_tx.timestamp.date()
+    # Imposta la data di fine dello storico a oggi.
     today = timezone.now().date()
+    # Calcola il numero di giorni per cui generare lo storico.
     days = (today - start_date).days + 1  # +1 per includere oggi
     logger.debug(f"Calcolo storico portafoglio per {user.username} dal {start_date} al {today}.")
 
     history_data = []
 
+    # Recupera tutti gli item (asset) attualmente nel portafoglio dell'utente.
     portfolio_items = PortfolioItem.objects.filter(user=user)
+    
+    # Se l'utente ha transazioni ma nessun item nel portafoglio (es. ha venduto tutto), restituisce storico vuoto.
     if not portfolio_items.exists():
         logger.info(f"Nessun item nel portafoglio per {user.username} nonostante le transazioni. Restituzione storico vuoto.")
         return JsonResponse({"history": []})
 
+    # Itera su ogni giorno dall'inizio dello storico fino ad oggi.
     for day_offset in range(days):
         date = start_date + timedelta(days=day_offset)
         day_total = 0
         found_data_for_day = False
-
+        # Itera su ogni asset nel portafoglio dell'utente.
         for item in portfolio_items:
             ticker = item.asset.ticker
+            # Recupera lo storico dei prezzi giornalieri per l'asset (per l'ultimo anno).
             hist = get_ticker_history(ticker, period="1y", interval="1d")
             if hist is not None:
+                # Controlla se esiste un prezzo di chiusura per l'asset nella data corrente.
                 date_str = date.strftime("%Y-%m-%d")
                 if date_str in hist.index:
                     close_price = hist.loc[date_str]["Close"]
+                    # Calcola il valore dell'asset posseduto e lo aggiunge al totale del giorno.
                     day_total += float(item.quantity) * float(close_price)
                     found_data_for_day = True
                 # else:

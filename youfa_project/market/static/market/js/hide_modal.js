@@ -28,6 +28,11 @@ $(document).ready(function () {
     }
     $("#priceChart").hide();
 
+    // Reset campi e messaggi relativi agli alert -> funziona
+    $("#alert-price").val("");
+    $("#alert-message").html("");
+    $("#existing-alerts").empty(); // (opzionale)
+
     // Reset variabili globali di stato se presenti
     window.currentTicker = null;
   });

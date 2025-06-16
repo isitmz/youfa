@@ -16,11 +16,11 @@ def check_price_alerts(user):
 
     # Recupera tutti gli alert attivi (non ancora triggerati)
     alerts = PriceAlert.objects.filter(user=user, triggered=False)
-    logger.debug(f"Trovati {alerts.count()} alert attivi per l'utente: {user.username}")
+    logger.info(f"Trovati {alerts.count()} alert attivi per l'utente: {user.username}")
 
     for alert in alerts:
         ticker = alert.asset.ticker
-        logger.debug(f"Controllo alert ID {alert.id} per ticker {ticker}, utente {user.username}")
+        logger.info(f"Controllo alert ID {alert.id} per ticker {ticker}, utente {user.username}")
         info = get_ticker_info(ticker)
 
         if not info:
@@ -35,7 +35,7 @@ def check_price_alerts(user):
 
         # Confronto con il target
         current_price = Decimal(str(current_price))  # cast per sicurezza con decimali
-        logger.debug(f"Alert ID {alert.id}: Ticker {ticker}, Prezzo Target {alert.target_price}, Direzione {'sopra' if alert.is_above else 'sotto'}, Prezzo Corrente {current_price}")
+        logger.info(f"Alert ID {alert.id}: Ticker {ticker}, Prezzo Target {alert.target_price}, Direzione {'sopra' if alert.is_above else 'sotto'}, Prezzo Corrente {current_price}")
         condition_met = (
             (alert.is_above and current_price >= alert.target_price) or
             (not alert.is_above and current_price <= alert.target_price)

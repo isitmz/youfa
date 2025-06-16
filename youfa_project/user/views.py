@@ -72,6 +72,7 @@ def edit_profile(request):
 
     return render(request, 'user/edit_profile.html', {'form': form})
 
+# vista per modificare la password utente con i controlli dovuti
 @login_required
 def change_password(request):
     if request.method == 'POST':
@@ -96,7 +97,6 @@ def change_password(request):
                         error_messages_list.append(str(error)) # Aggiungi l'errore direttamente
                 else:
                     # Errori legati a campi specifici
-                    # Prova a ottenere il label del campo per un messaggio più user-friendly
                     # PasswordChangeForm ha campi come 'old_password', 'new_password1', 'new_password2'
                     field_label = form.fields[field_name].label if field_name in form.fields and form.fields[field_name].label else field_name.replace('_', ' ').capitalize()
                     for error in error_list_for_field:
@@ -110,6 +110,7 @@ def change_password(request):
         form = PasswordChangeForm(request.user)
     return render(request, 'user/change_password.html', {'form': form})
 
+# vista per ricaricare il saldo utente con controlli
 @login_required
 def recharge_balance(request):
     if request.method == "POST":
@@ -127,10 +128,16 @@ def recharge_balance(request):
             messages.error(request, "Importo non valido.")
     return redirect("user:dashboard")
 
+# API richiamata in modalità AJAX che restituisce le notifications di un utente e li mostra in frontend
 @login_required
 def notifications_api(request):
     user = request.user
+
+    # metodo che verifica le notifiche dell'utente e successivamente li crea
+    check_price_alerts(user)
+
     notifications = []
+    # se utente ha le notifiche attive, le prendo dalla tabella Notification e le mostro (quelle triggerate dal metodo di sopra)
     if user.userprofile.notifiche_attive:
         qs = Notification.objects.filter(user=user).order_by('-created_at')[:10]
         notifications = [

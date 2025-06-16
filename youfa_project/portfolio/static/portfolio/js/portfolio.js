@@ -1,5 +1,5 @@
 $(document).ready(function () {
-  console.log("📈 Portfolio.js avviato (jQuery)");
+  console.log("📈 Portfolio.js avviato");
 
   let capitaleInvestito = 0;
   let assetsData = []; // Per grafico a torta: { ticker, quantity }
