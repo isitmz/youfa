@@ -93,7 +93,7 @@ $(document).ready(function () {
             const icon = alert.direction === 'above' ? '⬆️' : '⬇️';
             const alertHtml = `
               <div id="alert-item-${alert.id}" class="alert alert-light d-flex justify-content-between align-items-center">
-                <span>${icon} ${alert.target_price} €</span>
+                <span>${icon} ${alert.target_price} $</span>
                 <button class="btn btn-sm btn-outline-danger delete-alert-btn" data-alert-id="${alert.id}" data-ticker="${ticker}" title="Elimina alert">
                   <i class="bi bi-x-lg"></i>
                 </button>

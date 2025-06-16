@@ -1,9 +1,15 @@
-{% extends 'core/base.html' %} {% block content %}
+{% extends 'core/base.html' %} {% load static %} {% block content %}
 <div class="row justify-content-center">
   <div class="col-md-8">
     <div class="card border-secondary mb-4">
       <div class="card-header bg-light text-secondary">
         <h3 class="mb-0">Benvenuto, {{ user.username }}!</h3>
+        <div>
+          <strong>Saldo disponibile:</strong>
+          <span class="text-success fs-5"
+            >{{ user.userprofile.saldo|floatformat:2 }} USD</span
+          >
+        </div>
       </div>
       <div class="card-body">
         <!-- Blocco per mostrare i messaggi flash di Django -->
@@ -53,27 +59,50 @@
             <i class="bi bi-key me-2"></i> Cambia password
           </a>
         </div>
+        <!-- Form ricarica saldo -->
+        <div class="card border-secondary mt-5 p-3">
+          <h5>Ricarica il tuo saldo</h5>
+          <form
+            method="post"
+            action="{% url 'user:recharge_balance' %}"
+            class="row g-3 align-items-center mt-2"
+          >
+            {% csrf_token %}
+            <div class="col-auto flex-grow-1">
+              <input
+                type="number"
+                step="5"
+                min="10"
+                name="amount"
+                id="amount"
+                class="form-control"
+                placeholder="Inserisci importo positivo"
+                required
+              />
+            </div>
+            <div class="col-auto">
+              <button type="submit" class="btn btn-primary px-4">
+                Ricarica
+              </button>
+            </div>
+          </form>
+        </div>
+        <!-- Fine form ricarica saldo -->
         {% if user.userprofile.notifiche_attive %}
-        <div class="alert alert-info mt-4">
+        <div id="notifications-container" class="alert alert-info mt-4">
           <h5 class="mb-3">📢 Notifiche recenti</h5>
-          {% if notifications %}
-          <ul class="list-unstyled mb-0">
-            {% for n in notifications %}
-            <li class="mb-2">
-              <span>{{ n.message }}</span><br />
-              <small class="text-muted"
-                >{{ n.created_at|date:"d/m/Y H:i" }}</small
-              >
-            </li>
-            {% endfor %}
-          </ul>
-          {% else %}
-          <p class="text-muted mb-0">Nessuna notifica per ora.</p>
-          {% endif %}
+          <p>Caricamento notifiche...</p>
         </div>
         {% endif %}
       </div>
     </div>
   </div>
 </div>
+{% endblock %} {% block extra_js %}
+<script
+  src="https://code.jquery.com/jquery-3.7.1.min.js"
+  integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+  crossorigin="anonymous"
+></script>
+<script src="{% static 'user/js/check_notifications.js' %}"></script>
 {% endblock %}

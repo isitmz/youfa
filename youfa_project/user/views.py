@@ -1,9 +1,12 @@
+from decimal import Decimal, InvalidOperation
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib import messages
+from django.http import JsonResponse
 from django.shortcuts import render, redirect
 import logging
+from django.utils import timezone
 from .forms import UserProfileForm
 from .utils import check_price_alerts
 from user.models import Notification
@@ -16,16 +19,15 @@ def dashboard(request):
     user = request.user
 
     # Controllo e generazione notifiche se necessario
-    check_price_alerts(user)
+    # check_price_alerts(user)
 
     # Se ci sono notifiche attive le recuperiamo
-    notifications = []
-    if user.userprofile.notifiche_attive: 
-        notifications = Notification.objects.filter(user=user).order_by('-created_at')[:10]
+    # notifications = []
+    # if user.userprofile.notifiche_attive: 
+        # notifications = Notification.objects.filter(user=user).order_by('-created_at')[:10]
 
-    return render(request, 'user/dashboard.html', {
-        'notifications': notifications,
-    })
+    # rimpiazzato con Ajax
+    return render(request, 'user/dashboard.html', {'user': user})
 
 # mostra dati profilo
 @login_required
@@ -107,3 +109,36 @@ def change_password(request):
         logger.info(f"Visualizzazione form di cambio password (GET) per l'utente {request.user.username}.")
         form = PasswordChangeForm(request.user)
     return render(request, 'user/change_password.html', {'form': form})
+
+@login_required
+def recharge_balance(request):
+    if request.method == "POST":
+        amount_str = request.POST.get("amount")
+        try:
+            amount = Decimal(amount_str)
+            if amount <= 0:
+                messages.error(request, "Inserisci un importo positivo.")
+            else:
+                user_profile = request.user.userprofile
+                user_profile.saldo += amount
+                user_profile.save()
+                messages.success(request, f"Saldo ricaricato di {amount} USD con successo.")
+        except (InvalidOperation, TypeError):
+            messages.error(request, "Importo non valido.")
+    return redirect("user:dashboard")
+
+@login_required
+def notifications_api(request):
+    user = request.user
+    notifications = []
+    if user.userprofile.notifiche_attive:
+        qs = Notification.objects.filter(user=user).order_by('-created_at')[:10]
+        notifications = [
+            {
+                'id': n.id,
+                'message': n.message,
+                'created_at': timezone.localtime(n.created_at).strftime('%Y-%m-%d %H:%M:%S'),
+                'read': n.is_read,
+            } for n in qs
+        ]
+    return JsonResponse({'notifications': notifications})

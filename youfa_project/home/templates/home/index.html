@@ -58,6 +58,23 @@
   </div>
 </div>
 
+{% if user.is_authenticated %}
+<div class="text-center text-dark mt-5 mb-5">
+  <h2 class="display-6">Cosa aspetti, {{ user.username }}?</h2>
+  <p class="lead mt-3">
+    Grazie per aver scelto Youfa Exchange come tuo partner di investimento.
+    Qui puoi scoprire una vasta gamma di azioni ed ETF, monitorare il tuo portafoglio
+    in tempo reale e fare operazioni in totale sicurezza e trasparenza.
+  </p>
+  <p class="lead">
+    Con la nostra piattaforma intuitiva, ogni passo verso il tuo futuro finanziario è semplice e guidato.
+    Il mercato ti aspetta con tante opportunità: investi, monitora, cresci.
+  </p>
+  <a href="{% url 'market:market_home' %}" class="btn btn-primary btn-lg mt-3">
+    Vai al mercato
+  </a>
+</div>
+{% else %}
 <div class="text-center text-dark mt-5 mb-5">
   <h2 class="display-6">Inizia a investire oggi stesso</h2>
   <p class="lead mt-3">
@@ -69,5 +86,4 @@
     Registrati ora
   </a>
 </div>
-
-{% endblock %}
+{% endif %} {% endblock %}
