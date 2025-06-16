@@ -1,6 +1,4 @@
-{% extends 'core/base.html' %}
-
-{% block content %}
+{% extends 'core/base.html' %} {% block content %}
 <div class="row justify-content-center">
   <div class="col-md-8">
     <div class="card border-secondary mb-4">
@@ -36,16 +34,44 @@
         <p class="lead text-muted">Questa è la tua dashboard utente.</p>
 
         <div class="d-flex flex-column gap-3 mt-4">
-          <a href="{% url 'user:profile' %}" class="btn btn-outline-secondary btn-lg w-100">
+          <a
+            href="{% url 'user:profile' %}"
+            class="btn btn-outline-secondary btn-lg w-100"
+          >
             <i class="bi bi-person-circle me-2"></i> Visualizza profilo
           </a>
-          <a href="{% url 'user:edit_profile' %}" class="btn btn-outline-secondary btn-lg w-100">
+          <a
+            href="{% url 'user:edit_profile' %}"
+            class="btn btn-outline-secondary btn-lg w-100"
+          >
             <i class="bi bi-pencil-square me-2"></i> Modifica profilo
           </a>
-          <a href="{% url 'user:change_password' %}" class="btn btn-outline-secondary btn-lg w-100">
+          <a
+            href="{% url 'user:change_password' %}"
+            class="btn btn-outline-secondary btn-lg w-100"
+          >
             <i class="bi bi-key me-2"></i> Cambia password
           </a>
         </div>
+        {% if user.userprofile.notifiche_attive %}
+        <div class="alert alert-info mt-4">
+          <h5 class="mb-3">📢 Notifiche recenti</h5>
+          {% if notifications %}
+          <ul class="list-unstyled mb-0">
+            {% for n in notifications %}
+            <li class="mb-2">
+              <span>{{ n.message }}</span><br />
+              <small class="text-muted"
+                >{{ n.created_at|date:"d/m/Y H:i" }}</small
+              >
+            </li>
+            {% endfor %}
+          </ul>
+          {% else %}
+          <p class="text-muted mb-0">Nessuna notifica per ora.</p>
+          {% endif %}
+        </div>
+        {% endif %}
       </div>
     </div>
   </div>

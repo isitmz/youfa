@@ -1,7 +1,7 @@
 import logging
 from django.http import JsonResponse
 from django.shortcuts import render
-from market.models import Asset
+from market.models import Asset, PriceAlert
 from user.models import UserProfile
 from django.views.decorators.http import require_GET
 from decimal import Decimal, InvalidOperation
@@ -150,17 +150,18 @@ def trade_asset(request):
         return JsonResponse({"error": "Asset non trovato."}, status=404)
 
     user_profile = UserProfile.objects.get(user=request.user)
-    portfolio_item, created = PortfolioItem.objects.get_or_create(
-        user=request.user,
-        asset=asset,
-        defaults={"quantity": 0, "avg_price": 0}
-    )
 
     if operation == "buy":
         total_cost = quantity * price
         if user_profile.saldo < total_cost:
             logger.warning(f"Saldo insufficiente per l'acquisto: saldo={user_profile.saldo}, costo={total_cost}")
             return JsonResponse({"error": "Saldo insufficiente."}, status=400)
+
+        portfolio_item, _ = PortfolioItem.objects.get_or_create(
+            user=request.user,
+            asset=asset,
+            defaults={"quantity": 0, "avg_price": 0}
+        )
 
         new_total_qty = portfolio_item.quantity + quantity
         new_avg_price = (
@@ -174,7 +175,6 @@ def trade_asset(request):
         user_profile.saldo -= total_cost
         user_profile.save()
 
-        # Storico: salva transazione di acquisto
         PortfolioTransaction.objects.create(
             user=request.user,
             asset=asset,
@@ -193,6 +193,12 @@ def trade_asset(request):
         })
 
     else:  # sell
+        try:
+            portfolio_item = PortfolioItem.objects.get(user=request.user, asset=asset)
+        except PortfolioItem.DoesNotExist:
+            logger.warning(f"Tentata vendita senza possesso dell’asset: {ticker}")
+            return JsonResponse({"error": "Non possiedi questo asset."}, status=400)
+
         if portfolio_item.quantity < quantity:
             logger.warning(f"Quantità da vendere superiore a quella posseduta: posseduta={portfolio_item.quantity}, richiesta={quantity}")
             return JsonResponse({"error": "Quantità da vendere superiore a quella posseduta."}, status=400)
@@ -207,10 +213,8 @@ def trade_asset(request):
         user_profile.saldo += quantity * price
         user_profile.save()
 
-        # Calcolo percentuale di profitto
         profit_percent = ((price - portfolio_item.avg_price) / portfolio_item.avg_price) * 100
 
-        # Storico: salva transazione di vendita
         PortfolioTransaction.objects.create(
             user=request.user,
             asset=asset,
@@ -225,6 +229,70 @@ def trade_asset(request):
         return JsonResponse({
             "message": "Vendita effettuata con successo.",
             "saldo": float(user_profile.saldo),
-            "quantity": float(portfolio_item.quantity),
-            "avg_price": float(portfolio_item.avg_price),
+            "quantity": float(portfolio_item.quantity) if portfolio_item.quantity > 0 else 0,
+            "avg_price": float(portfolio_item.avg_price) if portfolio_item.quantity > 0 else 0,
         })
+
+
+# Vista che gestisce la creazione delle notifiche (da chiamare con AJAX)
+@login_required
+def create_price_alert(request):
+    if request.method == "POST":
+        ticker = request.POST.get("ticker")
+        target_price = request.POST.get("target_price")
+        direction = request.POST.get("direction")
+
+        try:
+            asset = Asset.objects.get(ticker=ticker.upper())
+            target_price = Decimal(target_price)
+            if target_price <= 0:
+                raise ValueError("Prezzo non valido")
+
+            is_above = direction == "above" # se direction è above, is_above = true
+
+            PriceAlert.objects.create(
+                user=request.user,
+                asset=asset,
+                target_price=target_price,
+                is_above=is_above
+            )
+            return JsonResponse({"success": True, "message": "Alert creato correttamente."})
+        except Exception as e:
+            return JsonResponse({"success": False, "message": f"Errore: {str(e)}"})
+
+    return JsonResponse({"success": False, "message": "Metodo non consentito."})
+
+
+# View per prendere tutti gli alert di un utente in base al ticker
+@login_required
+def get_user_alerts(request, ticker):
+    try:
+        asset = Asset.objects.get(ticker=ticker.upper())
+        alerts = PriceAlert.objects.filter(user=request.user, asset=asset, triggered=False)
+
+        alert_list = [
+            {
+                "id": alert.id,
+                "target_price": str(alert.target_price),
+                "direction": "above" if alert.is_above else "below"
+            }
+            for alert in alerts
+        ]
+
+        return JsonResponse({"alerts": alert_list})
+    except Asset.DoesNotExist:
+        return JsonResponse({"alerts": []})
+
+    
+# View per eliminare un alert
+@login_required
+def delete_price_alert(request):
+    if request.method == "POST":
+        alert_id = request.POST.get("alert_id")
+        try:
+            alert = PriceAlert.objects.get(id=alert_id, user=request.user)
+            alert.delete()
+            return JsonResponse({"success": True})
+        except PriceAlert.DoesNotExist:
+            return JsonResponse({"success": False, "message": "Alert non trovato"})
+    return JsonResponse({"success": False, "message": "Metodo non consentito."})

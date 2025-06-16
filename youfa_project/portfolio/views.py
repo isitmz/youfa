@@ -83,25 +83,31 @@ def user_portfolio(request):
 @require_GET
 def portfolio_history_api(request):
     user = request.user
+    logger.info(f"Richiesta API storico portafoglio per l'utente {user.username}.")
 
     # Recupera la prima transazione dell’utente
     first_tx = PortfolioTransaction.objects.filter(user=user).order_by("timestamp").first()
 
     if not first_tx:
+        logger.info(f"Nessuna transazione trovata per l'utente {user.username}. Restituzione storico vuoto.")
         return JsonResponse({"history": []})  # Nessuna transazione: grafico vuoto
 
     start_date = first_tx.timestamp.date()
     today = timezone.now().date()
     days = (today - start_date).days + 1  # +1 per includere oggi
+    logger.debug(f"Calcolo storico portafoglio per {user.username} dal {start_date} al {today}.")
 
     history_data = []
 
     portfolio_items = PortfolioItem.objects.filter(user=user)
+    if not portfolio_items.exists():
+        logger.info(f"Nessun item nel portafoglio per {user.username} nonostante le transazioni. Restituzione storico vuoto.")
+        return JsonResponse({"history": []})
 
     for day_offset in range(days):
         date = start_date + timedelta(days=day_offset)
         day_total = 0
-        found_data = False
+        found_data_for_day = False
 
         for item in portfolio_items:
             ticker = item.asset.ticker
@@ -111,13 +117,19 @@ def portfolio_history_api(request):
                 if date_str in hist.index:
                     close_price = hist.loc[date_str]["Close"]
                     day_total += float(item.quantity) * float(close_price)
-                    found_data = True
+                    found_data_for_day = True
+                # else:
+                    # logger.debug(f"Nessun dato storico per {ticker} in data {date_str} (periodo 1y).") # Log opzionale se serve dettaglio
+            # else:
+                # logger.warning(f"Dati storici non disponibili per {ticker} (periodo 1y).") # Log opzionale
 
         # Aggiungi solo se c'è almeno un dato valido per quel giorno
-        if found_data:
+        if found_data_for_day:
             history_data.append({
                 "date": date.strftime("%d/%m"),
                 "value": round(day_total, 2),
             })
+            logger.debug(f"Valore portafoglio per {user.username} in data {date.strftime('%Y-%m-%d')}: {round(day_total, 2)}.")
 
+    logger.info(f"Storico portafoglio per {user.username} calcolato. {len(history_data)} punti dati.")
     return JsonResponse({"history": history_data})

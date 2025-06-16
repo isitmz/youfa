@@ -33,13 +33,16 @@ $(document).ready(function() {
     // Bottone dettagli: usa api/details per dati completi
     $(".details-btn").click(function() {
         const ticker = $(this).data("ticker");
-        currentTicker = ticker;
+        currentTicker = ticker;        
         console.log(`🔍 Richiesta dettagli per ${ticker}`);
 
         // Pulisci modal
         $("#modal-name").text("");
         $("#modal-price").text("");
         $("#additional-info").empty();
+
+        // 🔄 Carica gli alert esistenti per il ticker selezionato
+        loadUserAlerts(ticker);
 
         // Mostra il modal
         modal.show();
@@ -66,6 +69,9 @@ $(document).ready(function() {
                 // Imposta nome e prezzo in alto
                 $("#modal-name").text(`${data.name} (${data.ticker})`);
                 $("#modal-price").text(`${data.price} ${data.currency}`);
+
+                // Impostiamo il bottone dell'alert
+                $("#create-alert-btn").data("ticker", ticker);
 
                 // Info aggiuntive in due colonne
                 const leftCol = `

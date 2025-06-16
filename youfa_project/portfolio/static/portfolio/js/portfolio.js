@@ -111,6 +111,7 @@ $(document).ready(function () {
     });
   }
 
+  // carica il grafico del portafoglio
   loadPortfolioHistory();
 });
 

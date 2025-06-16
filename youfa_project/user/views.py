@@ -5,13 +5,27 @@ from django.contrib import messages
 from django.shortcuts import render, redirect
 import logging
 from .forms import UserProfileForm
+from .utils import check_price_alerts
+from user.models import Notification
 
 # un'istanza del logger
 logger = logging.getLogger("user")
 
 @login_required
 def dashboard(request):
-    return render(request, 'user/dashboard.html')
+    user = request.user
+
+    # Controllo e generazione notifiche se necessario
+    check_price_alerts(user)
+
+    # Se ci sono notifiche attive le recuperiamo
+    notifications = []
+    if user.userprofile.notifiche_attive: 
+        notifications = Notification.objects.filter(user=user).order_by('-created_at')[:10]
+
+    return render(request, 'user/dashboard.html', {
+        'notifications': notifications,
+    })
 
 # mostra dati profilo
 @login_required
